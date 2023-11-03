@@ -1,4 +1,4 @@
-class HomeListing {
+class Home {
   constructor(
     title,
     description,
@@ -42,7 +42,7 @@ class HomeListing {
   }
 }
 
-export default HomeListing;
+export default Home;
 
 // id: Unique identifier for the home (UUID for NoSQL or auto-incremented integer for SQL).
 // title: A short, descriptive title of the rental property.
