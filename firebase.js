@@ -1,6 +1,16 @@
-const { initializeApp } = require("firebase/app");
+const admin = require("firebase-admin");
+
 const config = require("./config");
 
-const firebase = initializeApp(config.firebaseConfig);
+admin.initializeApp({
+  credential: admin.credential.cert(config),
+});
 
-module.exports = firebase;
+const db = admin.firestore();
+
+console.log("Successfully connected to Firebase and Firestore");
+
+module.exports = {
+  db,
+  admin,
+};
