@@ -1,20 +1,20 @@
-class Home {
+class Booking {
   constructor(data) {
     this.id = data.id;
     this.ownerID = data.ownerID;
-    this.address = data.address;
-    this.street = data.street;
-    this.city = data.city;
-    this.province = data.province;
-    this.postal = data.postal;
-    this.country = data.country;
-    this.bedrooms = data.bedrooms;
-    this.bathrooms = data.bathrooms;
+    this.renterID = data.renterID;
+    this.title = data.title;
+    this.description = data.description;
+    this.type = data.type;
     this.maxGuests = data.maxGuests;
+    this.amenties = data.amenties;
+    this.photos = data.photos;
+    this.price = data.price;
+    this.availability = data.availability;
   }
 }
 
-export default Home;
+export default Booking;
 
 // id: Unique identifier for the home (UUID for NoSQL or auto-incremented integer for SQL).
 // title: A short, descriptive title of the rental property.
