@@ -40,6 +40,7 @@ router.put("/update/:id", async (req, res) => {
   const { id } = req.params;
   const updateData = req.body;
   const documentRef = db.collection(HOME_COLLECTION).doc(id);
+  // TODO: Check if the user owns that specific document
 
   try {
     await documentRef.update(updateData);
