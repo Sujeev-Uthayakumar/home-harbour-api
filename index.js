@@ -7,12 +7,14 @@ const PORT = process.env.PORT || 3000;
 
 const authRouter = require("./routers/authRouter");
 const homeRouter = require("./routers/homeRouter");
+const favouriteRouter = require("./routers/favouriteRouter");
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use("/auth", authRouter);
 app.use("/api/homes", homeRouter);
+app.use("/api/favourites", favouriteRouter);
 
 app.get("/", (req, res) => {
   res.send("hello world");
