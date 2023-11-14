@@ -1,15 +1,26 @@
 const { admin } = require("../firebase");
+const { db } = require("../firebase");
 const express = require("express");
 
 const router = express.Router();
+const USER_COLLECTION = "users";
 
 router.post("/signup", async (req, res) => {
-  const { email, password } = req.body;
+  const { fullName, email, password, dateOfBirth } = req.body;
   try {
     const userRecord = await admin.auth().createUser({
       email,
       password,
     });
+
+    const documentCollection = db
+      .collection(USER_COLLECTION)
+      .doc(userRecord.uid);
+    await documentCollection.set({
+      fullName,
+      dateOfBirth,
+    });
+
     // Return the user record (be careful not to return sensitive info)
     res.status(201).send({ uid: userRecord.uid });
   } catch (error) {

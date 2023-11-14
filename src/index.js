@@ -1,6 +1,7 @@
 const express = require("express");
 const firebase = require("./firebase");
 const bodyParser = require("body-parser");
+const { functions } = require("firebase");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -27,3 +28,5 @@ app.use((req, res, next) => {
 app.listen(PORT, () => {
   console.log(`Server running on port: ${PORT}`);
 });
+
+exports.api = functions.https.onRequest(app);
