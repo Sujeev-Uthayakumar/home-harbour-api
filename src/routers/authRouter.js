@@ -13,18 +13,33 @@ router.post("/signup", async (req, res) => {
       password,
     });
 
+    const customToken = await admin.auth().createCustomToken(userRecord.uid);
+
     const documentCollection = db
       .collection(USER_COLLECTION)
       .doc(userRecord.uid);
+
     await documentCollection.set({
-      fullName,
+      email,
+      password,
+      fullName: fullName.toLowerCase(),
       dateOfBirth,
+      signUpDate: new Date().toISOString(),
     });
 
-    // Return the user record (be careful not to return sensitive info)
-    res.status(201).send({ uid: userRecord.uid });
+    res.status(201).send({
+      token: customToken,
+      userData: {
+        uid: userRecord.uid,
+        email,
+        fullName,
+        dateOfBirth,
+        signUpDate: new Date().toISOString(),
+      },
+    });
   } catch (error) {
-    res.status(400).send({ error: error.message });
+    console.log(error);
+    res.status(400).send({ error: error.code });
   }
 });
 
