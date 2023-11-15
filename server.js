@@ -1,14 +1,13 @@
 const express = require("express");
-const firebase = require("./firebase");
+const firebase = require("./src/firebase");
 const bodyParser = require("body-parser");
-const { functions } = require("firebase");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-const authRouter = require("./routers/authRouter");
-const homeRouter = require("./routers/homeRouter");
-const favouriteRouter = require("./routers/favouriteRouter");
+const authRouter = require("./src/routers/authRouter");
+const homeRouter = require("./src/routers/homeRouter");
+const favouriteRouter = require("./src/routers/favouriteRouter");
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -28,5 +27,3 @@ app.use((req, res, next) => {
 app.listen(PORT, () => {
   console.log(`Server running on port: ${PORT}`);
 });
-
-exports.api = functions.https.onRequest(app);
