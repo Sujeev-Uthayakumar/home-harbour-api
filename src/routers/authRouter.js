@@ -1,9 +1,15 @@
-const { admin } = require("../firebase");
+const { admin, bucket } = require("../firebase");
 const { db } = require("../firebase");
 const express = require("express");
 const jwt = require("jsonwebtoken");
+const multer = require("multer");
+
+const { checkFileExists } = require("../utils/fileHelpers");
 
 const router = express.Router();
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
+
 const USER_COLLECTION = "users";
 
 router.post("/signup", async (req, res) => {
@@ -27,10 +33,12 @@ router.post("/signup", async (req, res) => {
 
     await documentCollection.set({
       email,
-      password,
       fullName: fullName.toLowerCase(),
       dateOfBirth,
       signUpDate: new Date().toISOString(),
+      phoneNumber: "",
+      profilePic:
+        "https://firebasestorage.googleapis.com/v0/b/home-harbour.appspot.com/o/default-profile.png?alt=media",
     });
 
     res.status(201).send({
@@ -42,6 +50,8 @@ router.post("/signup", async (req, res) => {
         fullName,
         dateOfBirth,
         signUpDate: new Date().toISOString(),
+        phoneNumber: "",
+        profilePic: "",
       },
     });
   } catch (error) {
@@ -56,8 +66,8 @@ router.get("/find/:id", async (req, res) => {
 
   try {
     const doc = await documentRef.get();
-    console.log(doc);
     if (doc.exists) {
+      console.log({ id: doc.id, ...doc.data() });
       res.json({ id: doc.id, ...doc.data() });
     } else {
       res.status(404).send("Document not found");
@@ -92,6 +102,55 @@ router.get("/protected", async (req, res) => {
   } catch (error) {
     res.status(401).send({ error: error.message });
   }
+});
+
+router.post("/update/:id", async (req, res) => {
+  const updateData = req.body;
+  const documentRef = db.collection(USER_COLLECTION).doc(id);
+
+  try {
+    await documentRef.update(updateData);
+    res.status(200).send({ id, ...documentRef.data() });
+  } catch (error) {
+    console.log("Error updating document: ", error);
+    res.status(500).send(error.message);
+  }
+});
+
+router.post("/upload", upload.single("image"), async (req, res) => {
+  if (!req.file) {
+    res.status(400).send("No file uploaded.");
+    return;
+  }
+
+  // Create a new blob in the bucket and upload the file data.
+  const blob = bucket.file(req.file.originalname);
+  const blobStream = blob.createWriteStream({
+    metadata: {
+      contentType: req.file.mimetype,
+    },
+  });
+
+  blobStream.on("error", (err) => {
+    res.status(500).send(err);
+  });
+
+  blobStream.on("finish", async () => {
+    // The public URL can be used to directly access the file via HTTP.
+    const documentRef = db
+      .collection(USER_COLLECTION)
+      .doc(req.file.originalname);
+    try {
+      const publicUrl = `https://firebasestorage.googleapis.com/v0/b/${bucket.name}/o/${blob.name}?alt=media`;
+      await documentRef.update({ profilePic: publicUrl });
+      res.status(200).send({ profilePic: publicUrl });
+    } catch (error) {
+      console.log("Error updating document: ", error);
+      res.status(500).send(error.message);
+    }
+  });
+
+  blobStream.end(req.file.buffer);
 });
 
 module.exports = router;

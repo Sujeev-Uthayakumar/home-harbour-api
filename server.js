@@ -9,8 +9,8 @@ const authRouter = require("./src/routers/authRouter");
 const homeRouter = require("./src/routers/homeRouter");
 const favouriteRouter = require("./src/routers/favouriteRouter");
 
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json({ limit: "5mb" }));
+app.use(bodyParser.urlencoded({ limit: "5mb", extended: true }));
 
 app.use("/auth", authRouter);
 app.use("/api/homes", homeRouter);

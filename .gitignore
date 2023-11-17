@@ -1,3 +1,5 @@
 node_modules
 .env
 home-harbour-43a744a1814d.json
+uploads
+.DS_Store
