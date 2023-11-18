@@ -37,6 +37,7 @@ router.post("/signup", async (req, res) => {
       dateOfBirth,
       signUpDate: new Date().toISOString(),
       phoneNumber: "",
+      address: "",
       profilePic:
         "https://firebasestorage.googleapis.com/v0/b/home-harbour.appspot.com/o/default-profile.png?alt=media",
     });
@@ -51,6 +52,7 @@ router.post("/signup", async (req, res) => {
         dateOfBirth,
         signUpDate: new Date().toISOString(),
         phoneNumber: "",
+        address: "",
         profilePic: "",
       },
     });
@@ -105,12 +107,21 @@ router.get("/protected", async (req, res) => {
 });
 
 router.post("/update/:id", async (req, res) => {
+  const { id } = req.params;
   const updateData = req.body;
   const documentRef = db.collection(USER_COLLECTION).doc(id);
 
   try {
     await documentRef.update(updateData);
-    res.status(200).send({ id, ...documentRef.data() });
+    const updatedSnapshot = await documentRef.get();
+
+    // Check if the document exists and extract data
+    if (!updatedSnapshot.exists) {
+      return res.status(404).send("Document not found");
+    }
+    const updatedData = updatedSnapshot.data();
+    console.log(updatedData);
+    res.status(200).send({ id, ...updatedData });
   } catch (error) {
     console.log("Error updating document: ", error);
     res.status(500).send(error.message);
@@ -123,8 +134,9 @@ router.post("/upload", upload.single("image"), async (req, res) => {
     return;
   }
 
+  const fileName = req.file.originalname + `${new Date().getTime()}`;
   // Create a new blob in the bucket and upload the file data.
-  const blob = bucket.file(req.file.originalname);
+  const blob = bucket.file(fileName);
   const blobStream = blob.createWriteStream({
     metadata: {
       contentType: req.file.mimetype,
@@ -142,6 +154,7 @@ router.post("/upload", upload.single("image"), async (req, res) => {
       .doc(req.file.originalname);
     try {
       const publicUrl = `https://firebasestorage.googleapis.com/v0/b/${bucket.name}/o/${blob.name}?alt=media`;
+      console.log(publicUrl);
       await documentRef.update({ profilePic: publicUrl });
       res.status(200).send({ profilePic: publicUrl });
     } catch (error) {

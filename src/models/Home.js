@@ -1,20 +1,22 @@
 class Home {
   constructor(data) {
-    this.id = data.id;
     this.ownerID = data.ownerID;
     this.address = data.address;
     this.street = data.street;
     this.city = data.city;
     this.province = data.province;
     this.postal = data.postal;
-    this.country = data.country;
     this.bedrooms = data.bedrooms;
     this.bathrooms = data.bathrooms;
     this.maxGuests = data.maxGuests;
+    this.description = data.description;
+    this.title = data.title;
+    this.features = data.features;
+    this.price = data.price;
   }
 }
 
-export default Home;
+module.exports = Home;
 
 // id: Unique identifier for the home (UUID for NoSQL or auto-incremented integer for SQL).
 // title: A short, descriptive title of the rental property.

@@ -1,6 +1,8 @@
 const express = require("express");
 const { db } = require("../firebase");
 
+const Home = require("../models/Home");
+
 const router = express.Router();
 const HOME_COLLECTION = "homes";
 
@@ -51,9 +53,11 @@ router.put("/update/:id", async (req, res) => {
   }
 });
 
-router.post("/save", async (req, res) => {
+router.post("/create", async (req, res) => {
   const newData = req.body;
   const documentsCollection = db.collection(HOME_COLLECTION);
+
+  const newHome = new Home(newData);
 
   try {
     const docRef = await documentsCollection.add(newData);
