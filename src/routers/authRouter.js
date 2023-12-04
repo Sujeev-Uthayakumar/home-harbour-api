@@ -53,7 +53,8 @@ router.post("/signup", async (req, res) => {
         signUpDate: new Date().toISOString(),
         phoneNumber: "",
         address: "",
-        profilePic: "",
+        profilePic:
+          "https://firebasestorage.googleapis.com/v0/b/home-harbour.appspot.com/o/default-profile.png?alt=media",
       },
     });
   } catch (error) {
