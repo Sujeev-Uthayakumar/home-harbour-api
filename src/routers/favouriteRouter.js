@@ -3,6 +3,7 @@ const { db } = require("../firebase");
 
 const router = express.Router();
 const FAVOURITES_COLLECTION = "favourites";
+const HOME_COLLECTION = "homes";
 
 router.get("/findAll", async (req, res) => {
   db.collection(FAVOURITES_COLLECTION)
@@ -19,19 +20,56 @@ router.get("/findAll", async (req, res) => {
     });
 });
 
-router.get("/find/:id", async (req, res) => {
+router.get("/findHome/:id", async (req, res) => {
   const { id } = req.params;
-  const documentRef = db.collection(FAVOURITES_COLLECTION).doc(id);
 
   try {
-    const doc = await documentRef.get();
-    console.log(doc);
-    if (doc.exists) {
-      res.json({ id: doc.id, ...doc.data() });
+    const documentRef = await db
+      .collection(FAVOURITES_COLLECTION)
+      .doc(id)
+      .get();
+
+    console.log("doc", documentRef.data());
+    const { homeId } = documentRef.data();
+    const homeDocumentRef = await db
+      .collection(HOME_COLLECTION)
+      .doc(homeId)
+      .get();
+
+    if (documentRef.exists) {
+      console.log("doc", homeDocumentRef.data());
+      res.json({ id: homeId, ...homeDocumentRef.data() });
     } else {
       res.status(404).send("Document not found");
     }
   } catch (error) {
+    console.log(error);
+    res.status(500).send(error.message);
+  }
+});
+
+router.get("/findById/:id", async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const documentRef = await db
+      .collection(FAVOURITES_COLLECTION)
+      .where("userId", "==", id)
+      .get();
+
+    const doc = documentRef.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+
+    console.log("doc", doc);
+    if (doc) {
+      res.json(doc);
+    } else {
+      res.status(404).send("Document not found");
+    }
+  } catch (error) {
+    console.log(error);
     res.status(500).send(error.message);
   }
 });
@@ -51,13 +89,30 @@ router.put("/update/:id", async (req, res) => {
   }
 });
 
-router.post("/save", async (req, res) => {
-  const newData = req.body;
+router.post("/add/:id", async (req, res) => {
+  const { id } = req.params;
+  const userId = req.body.userId;
+  const documentsCollection = db.collection(FAVOURITES_COLLECTION);
+  const newData = {
+    userId: userId,
+    homeId: id,
+  };
+  try {
+    const docRef = await documentsCollection.add(newData);
+    res.status(201).send({ id: docRef.id, ...newData });
+  } catch (error) {
+    console.error("Error adding document: ", error);
+    res.status(500).send(error.message);
+  }
+});
+
+router.delete("/remove/:id", async (req, res) => {
+  const { id } = req.params;
   const documentsCollection = db.collection(FAVOURITES_COLLECTION);
 
   try {
-    const docRef = await documentsCollection.add(newData);
-    res.status(201).send(`Document created with ID: ${docRef.id}`);
+    await documentsCollection.doc(id).delete();
+    res.status(201).send({ id });
   } catch (error) {
     console.error("Error adding document: ", error);
     res.status(500).send(error.message);
